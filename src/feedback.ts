@@ -27,6 +27,7 @@ export interface VoicemeeterFeedbacks {
   stripSolo: VoicemeeterFeedback<StripSoloCallback>
   utilSelectedBus: VoicemeeterFeedback<UtilSelectedBusCallback>
   utilSelectedStrip: VoicemeeterFeedback<UtilSelectedStripCallback>
+  commandState: VoicemeeterFeedback<CommandStateCallback>
 
   // Index signature
   [key: string]: VoicemeeterFeedback<any>
@@ -141,6 +142,13 @@ interface UtilSelectedStripCallback {
   }>
 }
 
+interface CommandStateCallback {
+  feedbackId: 'commandStateCallback'
+  options: Readonly<{
+    state: string
+  }>
+}
+
 // Callback type for Presets
 export type FeedbackCallbacks =
   | BusEQCallback
@@ -158,6 +166,7 @@ export type FeedbackCallbacks =
   | StripSoloCallback
   | UtilSelectedBusCallback
   | UtilSelectedStripCallback
+  | CommandStateCallback
 
 // Force options to have a default to prevent sending undefined values
 type InputFieldWithDefault = Exclude<SomeCompanionFeedbackInputField, 'default'> & {
@@ -705,5 +714,35 @@ export function getFeedbacks(instance: VoicemeeterInstance): VoicemeeterFeedback
         return instance.selectedStrip === feedback.options.strip
       },
     },
+
+    commandState: {
+      type: 'boolean',
+      name: 'Command - State',
+      description: 'Indicates some Voicemeeter state',
+      options: [
+        {
+          type: 'dropdown',
+          label: 'State',
+          id: 'state',
+          default: 'lock',
+          choices: [
+            { id: 'lock', label: 'Lock' }
+          ],
+        },
+      ],
+      defaultStyle: {
+        color: combineRgb(0, 0, 0),
+        bgcolor: combineRgb(204, 204, 0),
+      },
+      callback: (feedback) => {
+        switch(feedback.options.state) {
+          case 'lock':
+            return instance.command.lock
+          default:
+            return false
+        }
+      },
+    },
+
   }
 }

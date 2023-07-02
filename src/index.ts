@@ -15,7 +15,7 @@ import { getFeedbacks } from './feedback'
 import { httpHandler } from './http'
 import { getPresets } from './presets'
 import { getUpgrades } from './upgrade'
-import { Bus, Strip, ProxyConnection, getAllData, parseVersion, VoicemeeterType } from './utils'
+import { Bus, Strip, ProxyConnection, getAllData, parseVersion, VoicemeeterType, CommandState } from './utils'
 import { Variables } from './variables'
 
 interface Device {
@@ -31,6 +31,7 @@ class VoicemeeterInstance extends InstanceBase<Config> {
   public connected = false
   public connection: null | Voicemeeter | ProxyConnection = null
   public proxySocket: null | Socket = null
+  public command: CommandState = { lock: false, button: [] }
   public bus: Bus[] = []
   public recorder: any = {}
   public strip: Strip[] = []
@@ -200,6 +201,18 @@ class VoicemeeterInstance extends InstanceBase<Config> {
         },
         setStripParameter: (index, property, value) => {
           this.proxySocket?.emit('setStripParameter', { index, property, value })
+        },
+        executeGlobalAction: (property, value) => {
+          this.proxySocket?.emit('executeGlobalAction', { property, value })
+        },
+        executeButtonAction: (index, property, value) => {
+          this.proxySocket?.emit('executeButtonAction', { index, property, value })
+        },
+        executeEqAction: (index, property, value) => {
+          this.proxySocket?.emit('executeEqAction', { index, property, value })
+        },
+        getGlobalState: (property) => {
+          this.proxySocket?.emit('getGlobalState', { property })
         },
         $type: '',
         $version: '',

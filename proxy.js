@@ -327,6 +327,23 @@ io.on('connection', socket => {
     connection?.setStripParameter(index, property, value);
   });
 
+  socket.on('executeGlobalAction', ({ property, value }) => {
+    connection?.executeGlobalAction(property, value);
+  });
+
+  socket.on('executeButtonAction', ({ index, property, value }) => {
+    connection?.executeButtonAction(index, property, value);
+  });
+
+  socket.on('executeEqAction', ({ index, property, value }) => {
+    connection?.executeEqAction(index, property, value);
+  });
+
+  socket.on('getGlobalState', ({ property }) => {
+    const value = connection?.getGlobalState(property)
+    socket.emit('getGlobalState', { property, value });
+  });
+
   socket.on('disconnect', () => {
     console.log('Socket Disconnected!')
   });

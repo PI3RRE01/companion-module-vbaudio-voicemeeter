@@ -1,5 +1,5 @@
 import { CompanionInputFieldDropdown } from '@companion-module/base'
-import { BusProperties, StripProperties, RecorderProperties } from 'voicemeeter-connector'
+import { BusProperties, StripProperties, RecorderProperties, CommandActions } from 'voicemeeter-connector'
 import VoicemeeterInstance from './'
 
 export interface Bus {
@@ -150,7 +150,11 @@ export interface ProxyConnection {
   setBusParameter(index: number, property: string, value: any): any
   setRecorderParameter(property: string, value: any): any
   setStripParameter(index: number, property: string, value: any): any
+  executeGlobalAction(property: string, value: any): any
+  executeButtonAction(index: number, property: string, value: any): any
+  executeEqAction(index: number, property: string, value: any): any
   updateDeviceList(): void
+  getGlobalState(property: string): any
   $inputDevices: []
   $outputDevices: []
   $type: ''
@@ -209,6 +213,7 @@ export const phsicalOutputs = {
 }
 
 export const getAllData = (instance: VoicemeeterInstance) => {
+  instance.command.lock = !!instance.connection?.getGlobalState(CommandActions.Lock)
   for (let i = 0; i < maxBus[instance.type]; i++) {
     let mode: BusMode = 'normal'
 
@@ -376,6 +381,18 @@ type EnforceDefault<T, U> = Omit<T, 'default'> & { default: U }
 
 export interface Options {
   busSelect: EnforceDefault<CompanionInputFieldDropdown, number>
+}
+
+export interface ButtonState {
+  state: boolean
+  stateOnly: boolean
+  trigger: boolean
+  color: boolean
+}
+
+export interface CommandState {
+  lock: boolean
+  button: ButtonState[]
 }
 
 export const getOptions = (instance: VoicemeeterInstance): Options => {

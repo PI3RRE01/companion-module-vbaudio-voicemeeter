@@ -39,6 +39,7 @@ export class Variables {
     variables.add({ name: 'Verison', variableId: 'version' })
     variables.add({ name: 'Util Selected Bus', variableId: 'util_selected_bus' })
     variables.add({ name: 'Util Selected Strip', variableId: 'util_selected_strip' })
+    variables.add({ name: 'Lock state', variableId: 'command_lock' })
 
     for (let i = 0; i < maxBus[this.instance.type]; i++) {
       const name = busName[this.instance.type][i]
@@ -168,6 +169,7 @@ export class Variables {
       newVariables.util_selected_strip =
         this.instance.selectedStrip === 8 ? 'Recorder' : this.instance.strip[this.instance.selectedStrip].label
     }
+    newVariables[`command_lock`] = this.instance.command.lock.toString()
 
     for (let i = 0; i < maxBus[this.instance.type]; i++) {
       const name = busName[this.instance.type][i]

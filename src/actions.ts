@@ -1,5 +1,5 @@
 import { CompanionActionEvent, SomeCompanionActionInputField } from '@companion-module/base'
-import { BusProperties, RecorderProperties, StripProperties } from 'voicemeeter-connector'
+import { BusProperties, RecorderProperties, StripProperties, CommandActions } from 'voicemeeter-connector'
 import VoicemeeterInstance from './index'
 import { BusMode, getOptions } from './utils'
 
@@ -1621,6 +1621,59 @@ export function getActions(instance: VoicemeeterInstance): VoicemeeterActions {
         instance.selectedStrip = instance.selectedStrip === action.options.strip ? -1 : action.options.strip
         instance.checkFeedbacks('utilSelectedStrip', 'routing')
         instance.variables?.updateVariables()
+      },
+    },
+
+    commandAction: {
+      name: 'Command - Action',
+      description: 'Execute actions on Voicemeeter',
+      options: [
+        {
+          type: 'dropdown',
+          label: 'Command',
+          id: 'command',
+          default: 'restart',
+          choices: [
+            { id: 'shutdown', label: 'Shutdown Voicemeeter' },
+            { id: 'show', label: 'Show Voicemeeter' },
+            { id: 'restart', label: 'Restart Voicemeeter' },
+            { id: 'eject', label: 'Eject Cassette' },
+            { id: 'lock', label: 'Lock GUI' }
+          ],
+        },
+        {
+          type: 'dropdown',
+          label: 'Value',
+          id: 'value',
+          default: 'Toggle',
+          choices: ['Toggle', 'On', 'Off'].map((type) => ({ id: type, label: type })),
+          isVisible: (options) => {
+            return options.command === 'lock'
+          },
+        },
+      ],
+      callback: async (action) => {
+        switch (action.options.command) {
+          case 'shutdown':
+            instance.connection?.executeGlobalAction(CommandActions.Shutdown, 1)
+            break
+          case 'show':
+            instance.connection?.executeGlobalAction(CommandActions.Show, 1)
+            break
+          case 'restart':
+            instance.connection?.executeGlobalAction(CommandActions.Restart, 1)
+            break
+          case 'eject':
+            instance.connection?.executeGlobalAction(CommandActions.Eject, 1)
+            break
+          case 'lock':
+            let value = action.options.value === 'On' ? 1 : 0
+            if (action.options.value === 'Toggle') {
+              value = instance.command.lock ? 0 : 1
+            }
+            instance.connection?.executeGlobalAction(CommandActions.Lock, value)
+            break
+        }
       },
     },
   }
